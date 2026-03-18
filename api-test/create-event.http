@@ -1,8 +1,9 @@
 POST http://localhost:8080/events
 Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImR1b25nZ2lhYmFvMjU0QGdtYWlsLmNvbSIsImV4cCI6MTc3MzkzMDQ2NiwidXNlcklkIjoxfQ.sxfZ9uhmiRcMaQXEqLqrxCGqv-g4y46CtQyOE6Lt2nk
 
 {
-    "name": "Go Conference",
+    "name": "Go Conference 3",
     "description": "A conference about Go programming language",
     "location": "San Francisco",
     "datetime": "2024-10-15T09:00:00Z"
