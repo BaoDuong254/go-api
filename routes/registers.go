@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -22,6 +23,10 @@ func registerForEvent(context *gin.Context) {
 	}
 	err = event.Register(userId)
 	if err != nil {
+		if errors.Is(err, models.ErrAlreadyRegistered) {
+			context.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -39,6 +44,10 @@ func unregisterForEvent(context *gin.Context) {
 	event.ID = eventId
 	err = event.Unregister(userId)
 	if err != nil {
+		if errors.Is(err, models.ErrRegistrationNotFound) {
+			context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -1,21 +1,24 @@
 package models
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"api.com/m/db"
 )
 
-type Event struct {
-	ID          int64
-	Name        string    `binding:"required"`
-	Description string    `binding:"required"`
-	Location    string    `binding:"required"`
-	Datetime    time.Time `binding:"required"`
-	UserID      int64
-}
+var ErrAlreadyRegistered = errors.New("user is already registered for this event")
+var ErrRegistrationNotFound = errors.New("registration not found")
 
-var events []Event = []Event{}
+type Event struct {
+	ID          int64     `json:"id"`
+	Name        string    `json:"name" binding:"required"`
+	Description string    `json:"description" binding:"required"`
+	Location    string    `json:"location" binding:"required"`
+	Datetime    time.Time `json:"datetime" binding:"required"`
+	UserID      int64     `json:"userId"`
+}
 
 func (e *Event) Save() error {
 	query := `INSERT INTO events (name, description, location, datetime, user_id) VALUES (?, ?, ?, ?, ?)`
@@ -43,6 +46,8 @@ func GetAllEvents() ([]Event, error) {
 		return nil, err
 	}
 	defer rows.Close()
+
+	events := make([]Event, 0)
 	for rows.Next() {
 		var event Event
 		err := rows.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.Datetime, &event.UserID)
@@ -51,6 +56,11 @@ func GetAllEvents() ([]Event, error) {
 		}
 		events = append(events, event)
 	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return events, nil
 }
 
@@ -92,13 +102,19 @@ func (event Event) Delete() error {
 }
 
 func (event Event) Register(userId int64) error {
-	quert := `INSERT INTO registrations (user_id, event_id) VALUES (?, ?)`
-	stmt, err := db.DB.Prepare(quert)
+	query := `INSERT INTO registrations (user_id, event_id) VALUES (?, ?)`
+	stmt, err := db.DB.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(userId, event.ID)
+	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return ErrAlreadyRegistered
+		}
+		return err
+	}
 	return err
 }
 
@@ -109,6 +125,16 @@ func (event Event) Unregister(userId int64) error {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(userId, event.ID)
-	return err
+	result, err := stmt.Exec(userId, event.ID)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrRegistrationNotFound
+	}
+	return nil
 }

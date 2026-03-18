@@ -1,6 +1,6 @@
 POST http://localhost:8080/events
 Content-Type: application/json
-Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImR1b25nZ2lhYmFvMjU0QGdtYWlsLmNvbSIsImV4cCI6MTc3MzkzMDQ2NiwidXNlcklkIjoxfQ.sxfZ9uhmiRcMaQXEqLqrxCGqv-g4y46CtQyOE6Lt2nk
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImR1b25nZ2lhYmFvMjU0QGdtYWlsLmNvbSIsImV4cCI6MTc3MzkzNjIxNywidXNlcklkIjoxfQ.wqdJUUWmSKbC3peD6IzGwd4Zx4Nmgm1fqeVqwsWoels
 
 {
     "name": "Go Conference 3",
